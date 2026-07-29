@@ -1,6 +1,6 @@
 # Graph in Graph (GiG)
 
-Code for **"Graph in Graph (GiG): A novel graph AI framework for integrating and interpreting whole-person health/medical and omics data"**.
+Code for **"Graph in Graph (GiG): A novel graph AI framework for integrating and interpreting medical and omics data"** ([bioRxiv](https://www.biorxiv.org/content/early/2026/07/24/2026.07.20.739657)).
 
 GiG is a dual-graph neural network that jointly models a *gene-level graph* (multi-omics: transcriptomics, methylation, eQTL-derived regulatory regions) nested inside a *patient-level graph* (clinical/phenotype features), to predict disease status and surface interpretable gene- and phenotype-level attention weights.
 
@@ -57,7 +57,7 @@ Heming Zhang, Kaiwen Fang, Yifei Lu — FuhaiLi AI Lab
 
 If you use this code, please cite:
 
-> Zhang H., Fang K., Lu Y., et al. "Graph in Graph (GiG): A novel graph AI framework for integrating and interpreting whole-person health/medical and omics data." [journal, year, DOI — fill in once available]
+> Zhang, H., Lu, Y., Fang, K., Xu, Z., Akabry Moghaddam, V., An, P., Jin, S., Wojczynski, M., Province, M., & Li, F. (2026). Graph in Graph (GiG): A novel graph AI framework for integrating and interpreting medical and omics data. *bioRxiv*. https://doi.org/10.64898/2026.07.20.739657
 
 ## License
 
