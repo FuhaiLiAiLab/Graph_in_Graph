@@ -1,0 +1,64 @@
+# --- Python / R environments (never commit these) ---
+.venv/
+.conda/
+venv/
+env/
+__pycache__/
+*.pyc
+.RData
+.Rhistory
+
+# --- OS / editor cruft ---
+**.DS_Store
+.claude/
+
+# --- Large binary formats not suited for git ---
+*.pdf
+*.h5
+*.psd
+
+# --- Logs, backups, scratch files ---
+*.log
+*.backup
+*.backup_*
+Untitled
+scratch_cellout*.txt
+
+# --- Private patient / subject-level data (IRB-restricted, must not be public) ---
+/data/
+couples_longevity*.csv
+subject_longevity_labels*.csv
+subject_list_t2ds_classes.csv
+model_training_subjects_813_1male.csv
+triplet_visit3.csv
+table6.csv
+t6.csv
+t6.txt
+pheno_union_weights.csv
+eqtl_targets_pvalue_check.csv
+
+# --- Regeneratable analysis/result outputs (large, not source) ---
+/analysis/
+/analysis_gene/
+/analysis_lu/
+/analysis_old/
+/gnn_result/
+/verify_output/
+/verify_output_gene/
+/gsea_output/
+/gsea_output_194/
+/enrichment_output/
+/pvalues_output/
+/pvalues_output_filtered/
+/pvalues_output_stratified/
+/hpo_results/
+/output/
+/desert/
+/image_create/
+
+# --- Draft manuscripts (not for public repo) ---
+*.docx
+*.xlsx
+
+# --- Packed image/figure bundles (large, regeneratable) ---
+*.zip

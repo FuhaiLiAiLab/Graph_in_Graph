@@ -1,0 +1,15 @@
+{
+  "accuracy": 0.19753086419753085,
+  "fold": 1,
+  "training_fold": 1,
+  "parameters": {
+    "lr": 0.01,
+    "weight_decay": 1e-10,
+    "gene_hidden_dim": 6,
+    "gig_hidden_dim": 18,
+    "class_weight": 0.9,
+    "ortho_weight": 0.05,
+    "link_weight": 0.05,
+    "dropout": 0.01
+  }
+}

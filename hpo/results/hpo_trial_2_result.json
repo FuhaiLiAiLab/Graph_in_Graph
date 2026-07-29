@@ -1,0 +1,17 @@
+{
+  "trial": 2,
+  "params": {
+    "lr": 0.0005,
+    "weight_decay": 7.782675650281833e-06,
+    "gene_hidden_dim": 6,
+    "gig_hidden_dim": 24,
+    "class_weight": 0.8,
+    "ortho_weight": 0.01,
+    "link_weight": 0.1,
+    "dropout": 0.2
+  },
+  "accuracy": 0.12345679012345678,
+  "fold": 1,
+  "training_fold": 1,
+  "timestamp": 1773895747.478816
+}

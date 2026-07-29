@@ -1,0 +1,55 @@
+{
+  "best_accuracy": 0.4567901234567901,
+  "best_params": {
+    "lr": 0.0005,
+    "weight_decay": 1e-06,
+    "gene_hidden_dim": 6,
+    "gig_hidden_dim": 48,
+    "class_weight": 0.7,
+    "ortho_weight": 0.001,
+    "link_weight": 0.05,
+    "dropout": 0.01
+  },
+  "target_accuracy": 0.8,
+  "all_results": [
+    {
+      "trial": 1,
+      "params": {
+        "lr": 0.0005,
+        "weight_decay": 1e-06,
+        "gene_hidden_dim": 6,
+        "gig_hidden_dim": 48,
+        "class_weight": 0.7,
+        "ortho_weight": 0.001,
+        "link_weight": 0.05,
+        "dropout": 0.01
+      },
+      "accuracy": 0.4567901234567901,
+      "fold": 1,
+      "training_fold": 1,
+      "timestamp": 1773895279.4789975
+    },
+    {
+      "trial": 2,
+      "params": {
+        "lr": 0.0005,
+        "weight_decay": 7.782675650281833e-06,
+        "gene_hidden_dim": 6,
+        "gig_hidden_dim": 24,
+        "class_weight": 0.8,
+        "ortho_weight": 0.01,
+        "link_weight": 0.1,
+        "dropout": 0.2
+      },
+      "accuracy": 0.12345679012345678,
+      "fold": 1,
+      "training_fold": 1,
+      "timestamp": 1773895747.478816
+    }
+  ],
+  "total_trials": 2,
+  "elapsed_time": 942.3167927265167,
+  "timestamp": 1773895756.544114,
+  "baseline_accuracy": 0.19753086419753085,
+  "improvement": 0.25925925925925924
+}

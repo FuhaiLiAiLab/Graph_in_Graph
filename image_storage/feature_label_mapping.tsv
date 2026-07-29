@@ -1,0 +1,42 @@
+old_abbreviation	standardized_label	full_name
+sex	Sex	Sex (Gender)
+age_v1	Age	Age at Visit 1
+hai_rl_v1	HAI	Healthy Aging Index (HAI) age- and sex-adjusted residuals for Linkage analysis at Visit 1
+fev1z_lk_v1	FEV1 (LK)	Forced Expiratory Volume in 1 second (FEV1) Z-score for Linkage analysis at Visit 1
+fev1z_v1	FEV1	Forced Expiratory Volume in 1 second (FEV1) Z-score at Visit 1
+fev6z_v1	FEV6	Forced Expiratory Volume in 6 seconds (FEV6) Z-score at Visit 1
+fev1fvc_bcz_v1	FEV1/FVC	FEV1/FVC ratio Box-Cox transformed Z-score at Visit 1
+fvcz_invn_v1	FVC	Forced Vital Capacity (FVC) inverse normal transformed Z-score at Visit 1
+tmpPPFEV1z_v1	PP-FEV1	Percent Predicted FEV1 temporary Z-score at Visit 1
+tmpPPFEV6z_v1	PP-FEV6	Percent Predicted FEV6 temporary Z-score at Visit 1
+_BMI_logz_v1	BMI	Body Mass Index (BMI) log-transformed Z-score at Visit 1
+_Waistz_v1	Waist Circ.	Average Abdominal (Waist) Circumference Z-score at Visit 1
+weightz_v1	Body Weight	Body Weight Z-score at Visit 1
+armspan_bcz_invn_v1	Arm Span	Arm Span Box-Cox transformed and inverse normal transformed Z-score at Visit 1
+_Pulsez_v1	Pulse Rate	Average Sitting Pulse Z-score at Visit 1
+_sbp2z_v1	SBP	Average Sitting Systolic Blood Pressure (SBP) Z-score at Visit 1
+_dbp2z_v1	DBP	Average Sitting Diastolic Blood Pressure (DBP) Z-score at Visit 1
+pp2z_v1	Pulse Pressure	Pulse Pressure Z-score at Visit 1
+abi_bcz_invn_v1	ABI	Ankle-Arm Blood Pressure Ratio Box-Cox transformed and inverse normal transformed Z-score at Visit 1
+mmsetot_bcz_v1	MMSE	Mini-Mental State Examination (MMSE) total score Box-Cox transformed Z-score at Visit 1
+animaltotz_v1	Animal Fluency	Animal Naming Test (Category Fluency) total score Z-score at Visit 1
+digitfwdtotz_v1	Digit Forward	Digit Span Forward Test total score Z-score at Visit 1
+digitbwdtotz_v1	Digit Backward	Digit Span Backward Test total score Z-score at Visit 1
+digitsymtotz_v1	Digit Symbol	Digit Symbol Substitution Test (DSST) total score Z-score at Visit 1
+logmemimtotz_v1	Logical Mem. (Imm.)	Logical Memory Immediate Recall Test total score Z-score at Visit 1
+logmemdlydtotz_v1	Logical Mem. (Del.)	Logical Memory Delayed Recall Test total score Z-score at Visit 1
+_totscorez_invn_v1	Total Score (SPPB)	Short Physical Performance Battery (SPPB) total score inverse normal transformed Z-score at Visit 1
+gaitspeedz_v1	Gait Speed	Gait Speed (derived from walking test) Z-score at Visit 1
+stand5time_invnz_v1	5x Stand Test	5-Times Chair Stand Time inverse normal transformed Z-score at Visit 1
+gripz_invn_v1	Grip Strength	Grip Strength Test inverse normal transformed Z-score at Visit 1
+albz_v1	Albumin	Serum Albumin level Z-score at Visit 1
+cholz_v1	Cholesterol	Total Cholesterol level Z-score at Visit 1
+creatr_bcz_invn_v1	Creatinine	Serum Creatinine level Box-Cox transformed and inverse normal transformed Z-score at Visit 1
+cysc_logz_invn_v1	Cystatin C	Serum Cystatin C (CysC) level log-transformed and inverse normal transformed Z-score at Visit 1
+hscrp_logz_v1	hsCRP	C-Reactive Protein level log-transformed Z-score at Visit 1
+ntbnpe_logz_v1	NT-BNP	N-Terminal pro-B-Type Natriuretic Peptide (NT-proBNP) level log-transformed Z-score at Visit 1
+transferrin_invnz_v1	Transferrin	Transferrin level inverse normal transformed Z-score at Visit 1
+inor_Tsadj_res_v1	Inorg. T (TSadj)	Relative Telomere Length (T/S Ratio) internal-control adjusted residuals at Visit 1
+TSadj_BP_bcz_v1	TSadj BP	Base Pair (BP) converted Telomere Length (T/S Ratio) Box-Cox transformed Z-score at Visit 1
+d2_logz_v1	D2	Ergocalciferol (Vitamin D2) status log-transformed Z-score at Visit 1
+d3z_v1	D3	Cholecalciferol (Vitamin D3) level Z-score at Visit 1
