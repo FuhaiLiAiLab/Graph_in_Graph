@@ -49,10 +49,6 @@ pip install -r requirements.txt
 
 This repository does **not** include subject-level data. `data/`, `couples_longevity*.csv`, `subject_longevity_labels*.csv`, and related files are excluded (see `.gitignore`) because they contain Long Life Family Study (LLFS) subject-level clinical/omics data under IRB-restricted access. Researchers seeking access to LLFS data should contact the LLFS data coordinating center.
 
-## Authors
-
-Heming Zhang, Kaiwen Fang, Yifei Lu — FuhaiLi AI Lab
-
 ## Citation
 
 If you use this code, please cite:
