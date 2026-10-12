@@ -6,7 +6,7 @@ from torch_scatter import scatter_add
 from torch_geometric.nn import MessagePassing
 from torch_geometric.nn import global_add_pool, global_mean_pool, global_max_pool, GlobalAttention, Set2Set
 from torch_geometric.nn.inits import glorot, zeros
-from torch_geometric.utils import add_self_loops, degree, softmax
+from torch_geometric.utils import add_self_loops, remove_self_loops, degree, softmax
 
 
 # GAT torch_geometric implementation
@@ -22,7 +22,7 @@ class GATConv(MessagePassing):
         num_edge_type(int): number of edge type, 0 indicate no edge attribute
 
     """
-    def __init__(self, input_dim, embed_dim, num_head=6, negative_slope=0.2, aggr = "add", num_edge_type=0):
+    def __init__(self, input_dim, embed_dim, num_head=6, negative_slope=0.2, aggr = "add", num_edge_type=0, output_relu=True):
         super(GATConv, self).__init__(node_dim=0)
         assert embed_dim%num_head==0
         self.k=embed_dim//num_head
@@ -31,9 +31,10 @@ class GATConv(MessagePassing):
         self.embed_dim = embed_dim
         self.num_head = num_head
         self.negative_slope = negative_slope
+        self.output_relu = output_relu
 
         self.weight_linear = nn.Linear(input_dim, embed_dim,bias=False)
-        self.att = torch.nn.Parameter(torch.Tensor(1, num_head, 2 * num_head * self.k))
+        self.att = torch.nn.Parameter(torch.Tensor(1, num_head, 2 * self.k))
         self.bias = torch.nn.Parameter(torch.Tensor(embed_dim))
 
         if num_edge_type>0:
@@ -49,6 +50,7 @@ class GATConv(MessagePassing):
 
     def forward(self, x, edge_index):
         # Add self loops in the edge space
+        edge_index,_ = remove_self_loops(edge_index)
         edge_index,_ = add_self_loops(edge_index, num_nodes = x.size(0))
         x = self.weight_linear(x).view(-1, self.num_head, self.k) # N * num_head * k
         return self.propagate(edge_index, x=x)
@@ -56,13 +58,13 @@ class GATConv(MessagePassing):
     def message(self, edge_index, x_i, x_j):
         alpha = (torch.cat([x_i, x_j], dim=-1) * self.att).sum(dim=-1) # E * num_head
         alpha = F.leaky_relu(alpha, self.negative_slope)
-        alpha = softmax(alpha, edge_index[0])
+        alpha = softmax(alpha, edge_index[1])
         return x_j * alpha.view(-1, self.num_head, 1) #E * num_head * k
 
     def update(self, aggr_out):
         aggr_out = aggr_out.view(-1,self.embed_dim)
         aggr_out = aggr_out + self.bias
-        return F.relu(aggr_out)
+        return F.relu(aggr_out) if self.output_relu else aggr_out
 
 
 class GAT(nn.Module):
@@ -72,7 +74,7 @@ class GAT(nn.Module):
         self.embedding_dim = embedding_dim
         self.conv_first, self.conv_block, self.conv_last = self.build_conv_layer(
                     input_dim, hidden_dim, embedding_dim)
-        
+
         self.act = nn.ReLU()
         self.act2 = nn.LeakyReLU(negative_slope = 0.3)
         self.out = torch.nn.Linear(embedding_dim, num_classes)

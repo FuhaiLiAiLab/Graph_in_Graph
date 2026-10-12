@@ -74,11 +74,15 @@ class GINConv(MessagePassing):
         - **output:** node features :math:`(|\mathcal{V}|, F_{out})` or
           :math:`(|\mathcal{V}_t|, F_{out})` if bipartite
     """
-    def __init__(self, in_channels, out_channels, eps: float = 0., train_eps: bool = False,
+    def __init__(self, in_channels, out_channels, eps: float = 0., train_eps: bool = False, activation_slope=None, hidden_layer_norm=False,
                  **kwargs):
         kwargs.setdefault('aggr', 'add')
         super().__init__(**kwargs)
-        self.lin = torch.nn.Linear(in_channels, out_channels)
+        activation = torch.nn.ReLU() if activation_slope is None else torch.nn.LeakyReLU(activation_slope)
+        self.nn = torch.nn.Sequential(torch.nn.Linear(in_channels, out_channels), activation, torch.nn.Linear(out_channels, out_channels))
+        if type(hidden_layer_norm) is not bool:raise ValueError('hidden_layer_norm must be bool')
+        self.use_hidden_norm = hidden_layer_norm
+        self.hidden_norm = torch.nn.LayerNorm(out_channels, eps=1e-5) if hidden_layer_norm else torch.nn.Identity()
         self.initial_eps = eps
         if train_eps:
             self.eps = torch.nn.Parameter(torch.empty(1))
@@ -88,11 +92,12 @@ class GINConv(MessagePassing):
 
     def reset_parameters(self):
         super().reset_parameters()
+        reset(self.nn)
+        if self.use_hidden_norm:self.hidden_norm.reset_parameters()
         self.eps.data.fill_(self.initial_eps)
 
     def forward(self, x: Union[Tensor, OptPairTensor], edge_index: Adj,
                 size: Size = None) -> Tensor:
-        x = self.lin(x)
         if isinstance(x, Tensor):
             x: OptPairTensor = (x, x)
         # propagate_type: (x: OptPairTensor)
@@ -100,8 +105,18 @@ class GINConv(MessagePassing):
         x_r = x[1]
         if x_r is not None:
             out = out + (1 + self.eps) * x_r
-        out = F.relu(out)
-        return out
+        return self.apply_mlp(out)
+
+    def apply_mlp(self, out):
+        if not self.use_hidden_norm:
+            return self.nn(out)
+        return self.nn[2](self.nn[1](self.hidden_norm(self.nn[0](out))))
+
+    def forward_dense(self, x: Tensor, adjacency: Tensor) -> Tensor:
+        # Target-by-source adjacency: exactly sum aggregation, without E x F messages.
+        if adjacency.shape != (x.size(0), x.size(0)):
+            raise ValueError('Adjacency shape differs from node features')
+        return self.apply_mlp(adjacency @ x + (1 + self.eps) * x)
 
     def message(self, x_j: Tensor) -> Tensor:
         return x_j
@@ -123,7 +138,7 @@ class GIN(nn.Module):
         self.embedding_dim = embedding_dim
         self.conv_first, self.conv_block, self.conv_last = self.build_conv_layer(
                     input_dim, hidden_dim, embedding_dim)
-        
+
         self.act = nn.ReLU()
         self.act2 = nn.LeakyReLU(negative_slope=0.2)
 
@@ -148,7 +163,7 @@ class GIN(nn.Module):
 
         x = self.act2(x)
         x_embed = x
-        
+
         output = self.out(x) # [output] contains all nodes [subfeatures + subjects]
         node_output = output[node_index] # [node_output] contains only subjects
         _, ypred = torch.max(output, dim=1)
