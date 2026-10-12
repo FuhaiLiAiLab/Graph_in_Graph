@@ -1,0 +1,11 @@
+{
+  "checkpoint_interval": 10,
+  "scheduler_horizon": 500,
+  "early_stopping": {
+    "enabled": false,
+    "monitor": "balanced_guard",
+    "min_epochs": 400,
+    "patience": 150,
+    "min_delta": 0.0
+  }
+}

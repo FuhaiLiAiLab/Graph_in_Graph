@@ -13,8 +13,8 @@ class GeoGraphLoader():
     def load_graph(geo_datalist, args):
         dataset_sampler = GeoGraphSampler(geo_datalist)
         dataset_loader = torch.utils.data.DataLoader(
-                                        dataset=dataset_sampler, 
-                                        batch_size=args.batch_size, 
+                                        dataset=dataset_sampler,
+                                        batch_size=args.batch_size,
                                         shuffle=False,
                                         num_workers=args.num_workers,
                                         collate_fn=collate_fn)

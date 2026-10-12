@@ -1,0 +1,18 @@
+name: llfs-gig-revision
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10
+  - pip
+  - pip:
+      - numpy==1.26.4
+      - pandas==2.2.2
+      - scikit-learn==1.5.1
+      - openpyxl==3.1.5
+      - scipy==1.13.1
+      - networkx==3.3
+      - tqdm==4.66.5
+      - statsmodels==0.14.4
+      - matplotlib==3.9.2
+      - pytest==8.3.3
+# Install the matching torch/PyG wheels next using ONE install_*.sh script.

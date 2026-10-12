@@ -1,4 +1,10 @@
+# 基因加权汇总向量的数量 K；不是基因数，也不是每个基因的向量维度。
+# 集群 train.py 通过 runtime.py 从这里读取默认值。修改后需重启进程并重新训练。
+# 显式传入 GIG_Transformer 的 gene_num_top_feature 仍优先，用于调参或加载旧模型。
+GENE_NUM_TOP_FEATURE = 128
+
 import math
+import sys
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -16,8 +22,12 @@ from torch_geometric.nn import global_add_pool, global_mean_pool, global_max_poo
 from torch_geometric.nn.inits import glorot, zeros
 from torch_geometric.utils import add_self_loops, degree, softmax
 
-from geo_loader.geo_readgraph import read_geodata, read_batch
-from geo_loader.geograph_sampler import GeoGraphLoader
+if __package__ and '.' in __package__:
+    from ..geo_loader.geo_readgraph import read_geodata, read_batch
+    from ..geo_loader.geograph_sampler import GeoGraphLoader
+else:
+    from geo_loader.geo_readgraph import read_geodata, read_batch
+    from geo_loader.geograph_sampler import GeoGraphLoader
 
 
 class GeneTransformerConv(MessagePassing):
@@ -113,7 +123,7 @@ class GeneTransformerConv(MessagePassing):
         # propagate_type: (query: Tensor, key:Tensor, value: Tensor, edge_attr: OptTensor) # noqa
         out = self.propagate(edge_index, query=query, key=key, value=value,
                              edge_attr=edge_attr, size=None)
-        
+
         # import pdb; pdb.set_trace()
 
         alpha = self._alpha
@@ -263,7 +273,7 @@ class PatientTransformerConv(MessagePassing):
         # propagate_type: (query: Tensor, key:Tensor, value: Tensor, edge_attr: OptTensor) # noqa
         out = self.propagate(edge_index, query=query, key=key, value=value,
                              edge_attr=edge_attr, size=None)
-        
+
         # import pdb; pdb.set_trace()
 
         alpha = self._alpha
@@ -340,19 +350,19 @@ class GIG_Transformer(nn.Module):
         self.graph_opt = graph_opt
 
         self.gene_conv_first, self.gene_conv_block, self.gene_conv_last = self.gene_build_conv_layer(
-                    gene_input_dim=gene_input_dim, 
-                    gene_hidden_dim=gene_hidden_dim, 
+                    gene_input_dim=gene_input_dim,
+                    gene_hidden_dim=gene_hidden_dim,
                     gene_embedding_dim=gene_embedding_dim,
                     gene_num_head=gene_num_head)
         if graph_opt == 'GinG':
             self.conv_first, self.conv_block, self.conv_last = self.build_conv_layer(
-                        gig_input_transform_dim=gig_input_transform_dim + (gene_num_top_feature * gene_embedding_dim), 
+                        gig_input_transform_dim=gig_input_transform_dim + (gene_num_top_feature * gene_embedding_dim),
                         gig_hidden_dim=gig_hidden_dim, gig_embedding_dim=gig_embedding_dim,
                         gig_num_head=gig_num_head)
         elif graph_opt == 'subject':
             self.conv_first, self.conv_block, self.conv_last = self.build_conv_layer(
                         gig_input_transform_dim=gig_input_transform_dim,
-                        gig_hidden_dim=gig_hidden_dim, 
+                        gig_hidden_dim=gig_hidden_dim,
                         gig_embedding_dim=gig_embedding_dim,
                         gig_num_head=gig_num_head)
 
@@ -361,13 +371,13 @@ class GIG_Transformer(nn.Module):
         self.pheno_transform = nn.Linear(gig_input_dim, gig_input_transform_dim)
         self.out = torch.nn.Linear(gig_embedding_dim, num_classes, bias=False)
         self.reset_parameters()
-    
+
     def reset_parameters(self):
         glorot(self.node_weight_assign)
         glorot(self.gene_transform.weight.data)
         glorot(self.pheno_transform.weight.data)
         glorot(self.out.weight.data)
-    
+
     def gene_build_conv_layer(self, gene_input_dim, gene_hidden_dim, gene_embedding_dim, gene_num_head):
         gene_conv_first = GeneTransformerConv(in_channels=gene_input_dim, out_channels=gene_hidden_dim, heads=gene_num_head)
         gene_conv_block = GeneTransformerConv(in_channels=gene_hidden_dim, out_channels=gene_hidden_dim, heads=gene_num_head)
@@ -380,7 +390,7 @@ class GIG_Transformer(nn.Module):
         conv_last = PatientTransformerConv(in_channels=gig_hidden_dim, out_channels=gig_embedding_dim, heads=gig_num_head)
         return conv_first, conv_block, conv_last
 
-    def forward(self, num_feature, num_subfeature, num_subject, num_gene_node, 
+    def forward(self, num_feature, num_subfeature, num_subject, num_gene_node,
                     gene_feature, gene_edge_index,
                     x, edge_index, node_label, node_index, args, device):
         ### Embeddings for gene features from batch to batch
@@ -390,16 +400,18 @@ class GIG_Transformer(nn.Module):
         upper_index = 0
         num_subject_node = gene_feature.shape[0]
         if self.graph_opt != 'subject':
-            for index in tqdm(range(0, num_subject_node, args.batch_size)):
+            for index in tqdm(range(0, num_subject_node, args.batch_size), desc='Gene batches', unit='batch',
+                              position=getattr(args, 'progress_position', 1) if sys.stderr.isatty() else 0,
+                              leave=False, mininterval=2 if sys.stderr.isatty() else 30, ascii=True):
                 if (index + args.batch_size) < num_subject_node:
                     upper_index = index + args.batch_size
                 else:
                     upper_index = num_subject_node
-                # [batch_node_weight_assign] 
+                # [batch_node_weight_assign]
                 batch_node_weight_assign = self.node_weight_assign.repeat(1, upper_index - index)
                 batch_node_weight_assign = batch_node_weight_assign.view(self.gene_num_top_feature, upper_index - index, num_gene_node).transpose(0,1)
-                geo_datalist = read_batch(index=index, upper_index=upper_index, 
-                                        x_input=gene_feature, num_feature=num_feature, 
+                geo_datalist = read_batch(index=index, upper_index=upper_index,
+                                        x_input=gene_feature, num_feature=num_feature,
                                         num_node=num_gene_node, edge_index=gene_edge_index)
                 dataset_loader, node_num, feature_dim = GeoGraphLoader.load_graph(geo_datalist, args)
                 for batch_idx, data in enumerate(dataset_loader):
@@ -415,7 +427,7 @@ class GIG_Transformer(nn.Module):
                     batch_assigned_gene_x = torch.matmul(batch_node_weight_assign, batch_gene_x).reshape(upper_index - index, -1)
                 # Preserve prediction of batch training data
                 clone_gene_x_embed[num_subfeature+index:num_subfeature+upper_index, :] = batch_assigned_gene_x
-        
+
         # Embeddings for [gene features / pheno features] for GiG_Transformer
         # import pdb; pdb.set_trace()
         if self.graph_opt == 'GinG':
@@ -441,42 +453,50 @@ class GIG_Transformer(nn.Module):
             # import pdb; pdb.set_trace()
             gig_x = self.gene_transform(clone_gene_x_embed) # gene features
             x_embed = gig_x.clone()
-            
+
         output = self.out(gig_x) # [output] contains all nodes [subfeatures + subjects]
         node_output = output[node_index] # [node_output] contains only subjects
         _, ypred = torch.max(output, dim=1)
         y_nodepred = ypred[node_index]
         return x_embed, node_output, ypred, y_nodepred
 
-    def loss(self, node_output, node_label, gene_edge_index, gene_num_top_feature):
+    def loss(self, node_output, node_label, gene_edge_index, gene_num_top_feature=None,
+             class_weights=None):
         ### Classification loss
-        node_output = node_output.to(device='cuda')
-        node_label = node_label.to(device='cuda')
+        device = node_output.device
+        node_label = node_label.to(device=device)
         node_label_indices = torch.argmax(node_label, dim=2).view(-1)
         # Weight vector renorm label
-        weight_vector = torch.zeros([3]).to(device='cuda')
-        for i in range(3):
-            n_samplei = torch.sum(node_label_indices == i)
-            if i == 2:
-                weight_vector[i] = len(node_label) / (n_samplei * 2)
-            else:
-                weight_vector[i] = len(node_label) / (n_samplei)
+        if class_weights is None:
+            counts = torch.bincount(node_label_indices, minlength=3).to(node_output.dtype)
+            if (counts == 0).any():
+                raise ValueError('Each class must be present when fitting class weights')
+            weight_vector = counts.reciprocal()
+            weight_vector[2] /= 2
+        else:
+            weight_vector = class_weights.to(device=device, dtype=node_output.dtype)
 
         node_output = torch.log_softmax(node_output, dim=-1)
         class_loss = F.nll_loss(node_output, node_label_indices, weight_vector)
+        if self.ortho_weight == self.link_weight == self.ent_weight == 0:
+            self.last_loss_components = dict(class_loss=class_loss.item(),ortho_loss=0.,link_loss=0.,ent_loss=0.)
+            return self.class_weight * class_loss
         ### Assignment loss
         # import pdb; pdb.set_trace()
         s = self.node_weight_assign # [gene_num_top_feature, num_gene_node]
         s = torch.softmax(s, dim=-1)
         # [orthogonality loss]
         ss = torch.matmul(s, s.transpose(0, 1))
-        i_s = torch.eye(gene_num_top_feature).type_as(ss)
+        if gene_num_top_feature is not None and gene_num_top_feature != self.gene_num_top_feature:
+            raise ValueError('Loss K differs from model K')
+        i_s = torch.eye(self.gene_num_top_feature, device=device).type_as(ss)
         ortho_loss = torch.norm(
             ss / torch.norm(ss, dim=(-1, -2), keepdim=True) -
             i_s / torch.norm(i_s), dim=(-1, -2))
         ortho_loss = torch.mean(ortho_loss)
         # [link_loss (or Laplacian loss)]
-        adj = utils.to_dense_adj(gene_edge_index).to(device='cuda')
+        adj = utils.to_dense_adj(gene_edge_index.to(device=device, dtype=torch.long),
+                                 max_num_nodes=self.node_weight_assign.shape[1])
         link_loss = adj - torch.matmul(s.transpose(0, 1), s)
         link_loss = torch.norm(link_loss, p=2)
         link_loss = link_loss / adj.numel()
@@ -486,5 +506,6 @@ class GIG_Transformer(nn.Module):
         ent_loss = (-s * torch.log(s + EPS)).sum(dim=-1).mean()
         ### Total loss
         total_loss = self.class_weight * class_loss + self.ortho_weight * ortho_loss + self.link_weight * link_loss + self.ent_weight * ent_loss
-        print('class_loss: ', class_loss.item(), 'ortho_loss: ', ortho_loss.item(), 'link_loss: ', link_loss.item(), 'ent_loss: ', ent_loss.item(), 'total_loss: ', total_loss.item())
+        self.last_loss_components = dict(class_loss=class_loss.item(), ortho_loss=ortho_loss.item(),
+                                         link_loss=link_loss.item(), ent_loss=ent_loss.item())
         return total_loss
